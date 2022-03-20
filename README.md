@@ -35,7 +35,7 @@ Left row is the original image, middle row is the process of meter rectification
 - CUDA >= 9.0 (10.0 is recommended)
 
 ## Models
-Download Trained [model](https://drive.google.com/open?id=1pPRS7qS_K1keXjSye0kksqhvoyD0SARz)
+Download Trained [model](https://drive.google.com/drive/folders/1juFFjBz9BlJEuLc_IxFj5RUz0Z_UfO0M?usp=sharing)
 
 Please put distro_net.pt into meter_distro/weight.  
 put textgraph_vgg_450.pth into model/meter_data.
