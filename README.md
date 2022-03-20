@@ -5,6 +5,8 @@ This is the first released system towards detection and recognition of complex m
 ![](1.png)
 ![](2.png)
 
+Left row is the original image, middle row is the process of meter rectification, right row is the result of meter value reading.
+
 
 
 ## ToDo List
