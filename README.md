@@ -1,4 +1,4 @@
-# A three-stage detection and recognition pipeline of complex meters in wild
+# Detect and Read meters in the wild
 This is the first released system towards detection and recognition of complex meters in wild. The system can be divided into three moduels. Fisrtly, a yolo-based detector is applied to get pure meter region. Secondly, a spatial transformer module is eatablished to rectify the position of meter. Lastly, an end-to-end network is to read meter values, which is implemented by pointer/dail predcition and key number learning.    
 
 ## Visulization results
