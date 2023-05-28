@@ -33,21 +33,30 @@ Left row is the original image, middle row is the process of meter rectification
 
 ## Meter Detection 
 We use official YOLO-V5 to detect meters.
+
 We release a dataset for training model, which can be downloaded from [data_detection]( https://drive.google.com/file/d/1RKcqJ0RWaBPpBbMtWwcgQ4S66Iwf97RS/view?usp=drive_link) The data is COCO-format and label 0 and 1 represent pointer meters and digital meters.
+
 We also provide trained weight in [yolo_weight](https://drive.google.com/file/d/1bHYpJro3ERmNTRO2JEo1inyU0_juqw5z/view?usp=drive_link) You dan put it in the yolov5 folder for inference.
 
-## Models
-Download Trained [model](https://drive.google.com/drive/folders/1juFFjBz9BlJEuLc_IxFj5RUz0Z_UfO0M?usp=sharing)
+## Meter Alignment
+We implement meter alignment by STN network. However, we obseve it is time-consuming. Thus we remove it in the latest version. You can still find it in the master branch.
 
-Please put distro_net.pt into meter_distro/weight.  
-put textgraph_vgg_450.pth into model/meter_data.
+## Meter Recognition
+We design a network for read meters, which consists of a pointer prediction head, dail prediction head, and a ocr-based value prediction head. By a post-processing method, meter readings can be obtained.
+
+The dataset for training the network has been realsed in [data](https://drive.google.com/file/d/1fFSSwoWAHkZWqgVCuqwOSFjSVfkjGk2U/view?usp=drive_link) the data is annotated by Labelme tool. "Train" folder contains pointer and dail information, and "Train1" folder contains value information. 
+
+You can run ```python viz_label.py``` to visualize different annotations.
+
+You can run ```python train.py``` to train your own dataset. The training configurations are in ```util/option.py```
+
+We also provide trained weight in [read_weight](https://drive.google.com/file/d/1sHmEEf9E0_kvL0LW1S5Y5jjFgjx_O5Dj/view?usp=drive_link) You should put it in the ```model/meter_data```
 
 ## Demo 
-You can run a demo script for a single image inference by two steps.
+You can run a demo script for a single image inference.
 
-```python get_meter_area.py```. and the detected meter will be stored in scene_image_data/deteced_meter
+```python predict_online.py```
 
-```python predict.py``` to get distored meter and final result.
 
 
 
