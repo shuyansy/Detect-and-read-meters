@@ -1,52 +1,126 @@
-from yolov5.detect import run
-import argparse
-from pathlib import Path
-import sys
+import torch
+import numpy as np
+from yolov5.models.experimental import attempt_load
+from yolov5.utils.general import non_max_suppression, scale_coords
+from yolov5.utils.augmentations import letterbox
+from yolov5.utils.torch_utils import select_device
+import cv2
+from random import randint
 import os
-
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # YOLOv5 root directory
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))  # add ROOT to PATH
-ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
-
-def parse_opt():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str,default='yolov5/runs/train/exp6/weights/best.pt', help='model path(s)')
-    parser.add_argument('--source', type=str, default='scene_image_data/image', help='file/dir/URL/glob, 0 for webcam')
-    parser.add_argument('--data', type=str, default='yolov5/data/mydata.yaml', help='(optional) dataset.yaml path')
-    parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
-    parser.add_argument('--conf-thres', type=float, default=0.75, help='confidence threshold')
-    parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
-    parser.add_argument('--max-det', type=int, default=1000, help='maximum detections per image')
-    parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--view-img', action='store_true', help='show results')
-    parser.add_argument('--save-txt', action='store_true',default=True, help='save results to *.txt')
-    parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
-    parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
-    parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
-    parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --classes 0, or --classes 0 2 3')
-    parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
-    parser.add_argument('--augment', action='store_true', help='augmented inference')
-    parser.add_argument('--visualize', action='store_true',help='visualize features')
-    parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--project', default='yolov5/runs/detect', help='save results to project/name')
-    parser.add_argument('--name', default='exp', help='save results to project/name')
-    parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    parser.add_argument('--line-thickness', default=3, type=int, help='bounding box thickness (pixels)')
-    parser.add_argument('--hide-labels', default=False, action='store_true', help='hide labels')
-    parser.add_argument('--hide-conf', default=False, action='store_true', help='hide confidences')
+import time
 
 
-    opt = parser.parse_args()
-    opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
-    return opt
+class Detector(object):
+
+    def __init__(self):
+        self.img_size = 640
+        self.threshold = 0.6
+        self.max_frame = 160
+        self.init_model()
+
+    def init_model(self):
+
+        self.weights = 'yolov5/best.pt'
+        self.device = '0' if torch.cuda.is_available() else 'cpu'
+        self.device = select_device(self.device)
+        model = attempt_load(self.weights, map_location=self.device)
+        model.to(self.device).eval()
+        model.half()
+        # torch.save(model, 'test.pt')
+        self.m = model
+        self.names = model.module.names if hasattr(
+            model, 'module') else model.names
+        self.colors = [
+            (randint(0, 255), randint(0, 255), randint(0, 255)) for _ in self.names
+        ]
+
+    def preprocess(self, img):
+
+        img0 = img.copy()
+        img = letterbox(img, new_shape=self.img_size)[0]
+        img = img[:, :, ::-1].transpose(2, 0, 1)
+        img = np.ascontiguousarray(img)
+        img = torch.from_numpy(img).to(self.device)
+        img = img.half()  # 半精度
+        img /= 255.0  # 图像归一化
+        if img.ndimension() == 3:
+            img = img.unsqueeze(0)
+
+        return img0, img
+
+    def plot_bboxes(self, image, bboxes, line_thickness=None):
+        tl = line_thickness or round(
+            0.002 * (image.shape[0] + image.shape[1]) / 2) + 1  # line/font thickness
+        for (x1, y1, x2, y2, cls_id, conf) in bboxes:
+            color = self.colors[self.names.index(cls_id)]
+            c1, c2 = (x1, y1), (x2, y2)
+            cv2.rectangle(image, c1, c2, color,
+                          thickness=tl, lineType=cv2.LINE_AA)
+            tf = max(tl - 1, 1)  # font thickness
+            t_size = cv2.getTextSize(
+                cls_id, 0, fontScale=tl / 3, thickness=tf)[0]
+            c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
+            cv2.rectangle(image, c1, c2, color, -1, cv2.LINE_AA)  # filled
+            cv2.putText(image, '{} ID-{:.2f}'.format(cls_id, conf), (c1[0], c1[1] - 2), 0, tl / 3,
+                        [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+        return image
+
+    def detect(self, im,i):
 
 
-def main(opt):
-    run(**vars(opt))
+        im0, img = self.preprocess(im)
+
+        pred = self.m(img, augment=False)[0]
+        pred = pred.float()
+        pred = non_max_suppression(pred, self.threshold, 0.3)
+
+        pred_boxes = []
+        image_info = {}
+        count = 0
+
+        digital_list,meter_list=[],[]
+        for det in pred:
+            if det is not None and len(det):
+                det[:, :4] = scale_coords(
+                    img.shape[2:], det[:, :4], im0.shape).round()
+
+                for *x, conf, cls_id in det:
+                    lbl = self.names[int(cls_id)]
 
 
-if __name__ == "__main__":
-    opt = parse_opt()
-    main(opt)
+                    x1, y1 = int(x[0]), int(x[1])
+                    x2, y2 = int(x[2]), int(x[3])
+
+                    region=im0[y1:y2,x1:x2]
+                    if lbl =="meter":
+                        meter_list.append(region)
+                    else:
+                        digital_list.append(region)
+
+                    pred_boxes.append(
+                        (x1, y1, x2, y2, lbl, conf))
+                    count += 1
+                    key = '{}-{:02}'.format(lbl, count)
+                    image_info[key] = ['{}×{}'.format(
+                        x2-x1, y2-y1), np.round(float(conf), 3)]
+
+        im = self.plot_bboxes(im, pred_boxes)
+        return im, image_info, digital_list, meter_list
+
+
+if __name__=="__main__":
+    det=Detector()
+    path='/home/sy/ocr/datasets/all_meter_image/'
+    img_list=os.listdir(path)
+    total_time=0
+    num=0
+    for i in img_list:
+        img=cv2.imread(path+i)
+        start_time=time.time()
+        image,image_info,digital_list, meter_list=det.detect(img,i)
+        end_time=time.time()
+        total_time += end_time - start_time
+        fps = (num + 1) / total_time
+        num+=1
+        print("fps",fps)
+

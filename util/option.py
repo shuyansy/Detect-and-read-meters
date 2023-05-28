@@ -27,22 +27,19 @@ class BaseOptions(object):
 
         # basic opts
         self.parser.add_argument('--exp_name', default="meter_data", type=str,help='Experiment name')
-        self.parser.add_argument("--gpu", default="0,1,2", help="set gpu id", type=str)
-        self.parser.add_argument('--resume', default=None, type=str, help='Path to target resume checkpoint')
+        self.parser.add_argument("--gpu", default="0", help="set gpu id", type=str)
+        self.parser.add_argument('--resume', default='', type=str, help='Path to target resume checkpoint')
         self.parser.add_argument('--num_workers', default=4, type=int, help='Number of workers used in dataloading')
         self.parser.add_argument('--cuda', default=True, type=str2bool, help='Use cuda to train model')
         self.parser.add_argument('--mgpu', action='store_true', help='Use multi-gpu to train model',default=True)
         self.parser.add_argument('--save_dir', default='./model/', help='Path to save checkpoint models')
         self.parser.add_argument('--vis_dir', default='./vis/', help='Path to save visualization images')
-        self.parser.add_argument('--ana_dir', default='./ana/', help='Path to save visualization images')
-        self.parser.add_argument('--log_dir', default='./logs/', help='Path to tensorboard log')
-        self.parser.add_argument('--loss', default='CrossEntropyLoss', type=str, help='Training Loss')
+      
         self.parser.add_argument('--pretrain', default=True, type=str2bool, help='Pretrained AutoEncoder model')
-        self.parser.add_argument('--verbose', '-v', default=True, type=str2bool, help='Whether to output debug info')
         self.parser.add_argument('--viz', action='store_true', help='Whether to output debug info')
 
         # train opts
-        self.parser.add_argument('--max_epoch', default=500, type=int, help='Max epochs')
+        self.parser.add_argument('--max_epoch', default=100, type=int, help='Max epochs')
         self.parser.add_argument('--lr', '--learning-rate', default=1e-4, type=float, help='initial learning rate')
         self.parser.add_argument('--lr_adjust', default='fix',
                                  choices=['fix', 'poly'], type=str, help='Learning Rate Adjust Strategy')
@@ -50,7 +47,7 @@ class BaseOptions(object):
         self.parser.add_argument('--weight_decay', '--wd', default=0., type=float, help='Weight decay for SGD')
         self.parser.add_argument('--gamma', default=0.1, type=float, help='Gamma update for SGD lr')
         self.parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
-        self.parser.add_argument('--batch_size', default=4, type=int, help='Batch size for training')
+        self.parser.add_argument('--batch_size', default=2, type=int, help='Batch size for training')
         self.parser.add_argument('--optim', default='Adam', type=str, choices=['SGD', 'Adam'], help='Optimizer')
         self.parser.add_argument('--save_freq', default=5, type=int, help='save weights every # epoch')
         self.parser.add_argument('--display_freq', default=10, type=int, help='display training metrics every # iter')
@@ -68,21 +65,14 @@ class BaseOptions(object):
         self.parser.add_argument('--means', type=int, default=(0.485, 0.456, 0.406), nargs='+', help='mean')
         self.parser.add_argument('--stds', type=int, default=(0.229, 0.224, 0.225), nargs='+', help='std')
         self.parser.add_argument('--input_size', default=640, type=int, help='model input size')
-        self.parser.add_argument('--test_size', default=(512, 1024), type=tuple, help='model input size')
+        self.parser.add_argument('--test_size', default=(512, 1024 ), type=tuple, help='model input size')
 
         # eval args
-        self.parser.add_argument('--checkepoch', default=450, type=int, help='Load checkpoint number')  #110, 220
+        self.parser.add_argument('--checkepoch', default=100, type=int, help='Load checkpoint number')  #110, 220
         self.parser.add_argument('--start_epoch', default=0, type=int, help='start epoch number')
         self.parser.add_argument('--pointer', default=0.6      , type=float, help='tr')
         self.parser.add_argument('--dail', default=0.5, type=float, help='tcl')
         self.parser.add_argument('--text', default=0.6, type=float, help='kernel')
-        self.parser.add_argument('--border', default=0.7, type=float, help='border')
-        self.parser.add_argument('--graph_link', default=False, type=str2bool, help='link type')
-        self.parser.add_argument('--link_thresh', default=0.85, type=float, help='link_thresh')
-        self.parser.add_argument('--expend', default=-0.05, type=float, help='expend')
-
-        # demo args
-        self.parser.add_argument('--img_root', default=None, type=str, help='Path to deploy images')
 
 
     def parse(self, fixed=None):

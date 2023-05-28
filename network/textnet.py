@@ -136,40 +136,62 @@ class TextNet(nn.Module):
         pointer_pred = torch.sigmoid(output[0, 0, :, :]).data.cpu().numpy()
         dail_pred = torch.sigmoid(output[0, 1, :, :]).data.cpu().numpy()
         text_pred = torch.sigmoid(output[0, 2, :, :]).data.cpu().numpy()
-        pointer_pred = (pointer_pred > 0.6).astype(np.uint8)
-        dail_pred = (dail_pred > 0.7).astype(np.uint8)
+        pointer_pred = (pointer_pred > 0.5).astype(np.uint8)
+        dail_pred = (dail_pred > 0.5).astype(np.uint8)
         text_pred = (text_pred > 0.7).astype(np.uint8)
+        
+        
 
-
-        # dail_label=self.filter(dail_pred)
+        dail_label=self.filter(dail_pred,n=30)
         text_label = self.filter(text_pred)
-        dail_label=dail_pred
+        
+        
+        # cv2.imshow("srtc",text_pred*255)
+        # cv2.imshow("1", pointer_pred * 255)
+        # cv2.imshow("2", dail_label * 255)
+        # cv2.waitKey(0)
 
         # order dail_label by y_coordinates
         dail_edges = dail_label * 255
         dail_edges = dail_edges.astype(np.uint8)
         _, dail_contours,_ = cv2.findContours(dail_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # new
+        text_edges = text_label * 255
+        text_edges = text_edges.astype(np.uint8)
+        _, text_contours,_ = cv2.findContours(text_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        ref_point = []
+        for i in range(len(text_contours)):
+            rect = cv2.minAreaRect(text_contours[i])
+            ref_point.append((int(rect[0][0]), int(rect[0][1])))
+        # print("ref",ref_point)
+        
+        
         std_point = []
         for i in range(len(dail_contours)):
             rect = cv2.minAreaRect(dail_contours[i])
             std_point.append((int(rect[0][0]), int(rect[0][1])))
-
+        
+        
+        # print("std",std_point)
+        
+        if len(std_point)==0:
+            return pointer_pred, dail_label, text_label, (None, None),None
+            
+        
         if len(std_point) < 2:
-            std_point=None
-            return pointer_pred, dail_label, text_label, (None, None),std_point
+                # std_point=None
+            std_point.append(ref_point[0])
+            # return pointer_pred, dail_label, text_label, (None, None),[std_point[0],ref_point[0]]
         else:
             if std_point[0][1] >= std_point[1][1]:
                 pass
             else:
                 std_point[0], std_point[1] = std_point[1], std_point[0]
 
+        # print("******",std_point)
 
-
-        # cv2.imshow("srtc",text_pred*255)
-        # cv2.imshow("1", pointer_pred * 255)
-        # cv2.imshow("2", dail_pred * 255)
-        # cv2.waitKey(0)
-
+       
 
         word_edges =text_label* 255
         img_bin, contours, hierarchy = cv2.findContours(word_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -188,7 +210,7 @@ class TextNet(nn.Module):
             rect_points = cv2.boxPoints(cv2.minAreaRect(contours[index]))
             bboxes = np.int0(rect_points)
             bboxes=order_points(bboxes)
-            print("bbox", bboxes)
+            # print("bbox", bboxes)
             boxes=bboxes.reshape(1,8)
             mapping=[0]
             mapping=np.array(mapping)
@@ -201,7 +223,10 @@ class TextNet(nn.Module):
         else:
             preds=None
             preds_size=None
-
+        
+        
+        
+       
         return pointer_pred,dail_label,text_label,(preds,preds_size),std_point
 
 

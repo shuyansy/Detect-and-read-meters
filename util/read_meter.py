@@ -11,15 +11,13 @@ class MeterReader(object):
     def __init__(self):
         pass
 
-
     def __call__(self, image,point_mask,dail_mask,word_mask,number,std_point):
 
         img_result = image.copy()
         value=self.find_lines(img_result,point_mask,dail_mask,number,std_point)
-
+        print("value",value)
 
         return value
-
 
 
 
@@ -41,10 +39,14 @@ class MeterReader(object):
         pointer_lines = cv2.HoughLinesP(pointer_edges, 1, np.pi / 180, 10, np.array([]), minLineLength=10,
                                         maxLineGap=400)
         coin1, coin2 = None, None
-        for x1, y1, x2, y2 in pointer_lines[0]:
-            coin1 = (x1, y1)
-            coin2 = (x2, y2)
-            cv2.line(ori_img, (x1, y1), (x2, y2), (255, 0, 255), 2)
+
+        try:
+            for x1, y1, x2, y2 in pointer_lines[0]:
+                coin1 = (x1, y1)
+                coin2 = (x2, y2)
+                cv2.line(ori_img, (x1, y1), (x2, y2), (255, 0, 255), 2)
+        except TypeError:
+            return "can not detect pointer"
 
 
         h, w, _ = ori_img.shape
@@ -64,6 +66,8 @@ class MeterReader(object):
         # calculate angle
         a1 = std_point[0]
         a2 = std_point[1]
+        cv2.circle(ori_img, a1, 2, (255, 0, 0), 2)
+        cv2.circle(ori_img, a2, 2, (255, 0, 0), 2)
         one = [[pointer_line[0][0], pointer_line[0][1]], [a1[0], a1[1]]]
         two = [[pointer_line[0][0], pointer_line[0][1]], [a2[0], a2[1]]]
         three = [[pointer_line[0][0], pointer_line[0][1]], [pointer_line[1][0], pointer_line[1][1]]]
@@ -110,7 +114,7 @@ class MeterReader(object):
             value=round(value,3)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        ori_img = cv2.putText(ori_img, str(value), (30, 30), font, 1.2, (255, 0 , 255), 2)
+        ori_img = cv2.putText(ori_img, str(value), (30, 30), font, 1.2, (255, 0,255), 2)
 
         cv2.imshow("result",ori_img)
         cv2.waitKey(0)
