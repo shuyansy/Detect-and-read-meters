@@ -12,15 +12,12 @@ Left row is the original image, middle row is the process of meter rectification
 ## ToDo List
 
 - [x] Release testing code
-- [ ] Release training code and dataset(after paper release)
-- [x] existing three-stage models
-- [ ] A new end-to-end model for image distoration and meter value reading
+- [x] Release training code and dataset
+- [x] existing models
 - [ ] A new branch for digital-meter recognition
 - [x] Document for testing
-- [ ] Document for training(after paper release)
+- [x] Document for training
 - [x] Demo script for single image
-- [ ] Demo script for video
-- [ ] Evaluation
 
 
 ## Installation
@@ -33,6 +30,12 @@ Left row is the original image, middle row is the process of meter rectification
 - skimage
 - OpenCV==3.0.x
 - CUDA >= 9.0 (10.0 is recommended)
+
+## meter detection
+we use official yolov5 to detect meters in the wild
+we release a dataset for meter detection in https://drive.google.com/file/d/1RKcqJ0RWaBPpBbMtWwcgQ4S66Iwf97RS/view?usp=drive_link the label is yolo-format, and label 0 and 1 represent pointer and digital meter.
+we also provide trained weight in https://drive.google.com/file/d/1bHYpJro3ERmNTRO2JEo1inyU0_juqw5z/view?usp=drive_link You dan download it and put it in the yolov5 folder for inference.
+
 
 ## Models
 Download Trained [model](https://drive.google.com/drive/folders/1juFFjBz9BlJEuLc_IxFj5RUz0Z_UfO0M?usp=sharing)
