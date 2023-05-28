@@ -48,6 +48,8 @@ The dataset for training the network has been realsed in [data](https://drive.go
 
 You can run ```python viz_label.py``` to visualize different annotations.
 
+![](3.png)
+
 You can run ```python train.py``` to train your own dataset. The training configurations are in ```util/option.py```
 
 We also provide trained weight in [read_weight](https://drive.google.com/file/d/1sHmEEf9E0_kvL0LW1S5Y5jjFgjx_O5Dj/view?usp=drive_link) You should put it in the ```model/meter_data```
@@ -56,6 +58,17 @@ We also provide trained weight in [read_weight](https://drive.google.com/file/d/
 You can run a demo script for a single image inference.
 
 ```python predict_online.py```
+
+## Paper
+The project only for academic research, if you are interested in it, please star our project! And cite our paper as follows:
+@misc{shu2023read,
+      title={Read Pointer Meters in complex environments based on a Human-like Alignment and Recognition Algorithm}, 
+      author={Yan Shu and Shaohui Liu and Honglei Xu and Feng Jiang},
+      year={2023},
+      eprint={2302.14323},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
 
 
 
