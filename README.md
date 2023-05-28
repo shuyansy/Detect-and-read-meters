@@ -1,5 +1,5 @@
 # Detect and Read meters in the wild
-This is the first released system towards detection and recognition of complex meters in wild. The system can be divided into three moduels. Fisrtly, a yolo-based detector is applied to get pure meter region. Secondly, a spatial transformer module is eatablished to rectify the position of meter. Lastly, an end-to-end network is to read meter values, which is implemented by pointer/dail predcition and key number learning.    
+This is areleased system towards detection and recognition of complex meters in wild. The system can be divided into three moduels. Fisrtly, a yolo-based detector is applied to get pure meter region. Secondly, a spatial transformer module is eatablished to rectify the position of meter. Lastly, an end-to-end network is to read meter values, which is implemented by pointer/dail predcition and key number learning.    
 
 ## Visulization results
 ![](1.png)
@@ -12,15 +12,12 @@ Left row is the original image, middle row is the process of meter rectification
 ## ToDo List
 
 - [x] Release testing code
-- [ ] Release training code and dataset(after paper release)
+- [x] Release training code and dataset
 - [x] existing three-stage models
-- [ ] A new end-to-end model for image distoration and meter value reading
 - [ ] A new branch for digital-meter recognition
 - [x] Document for testing
-- [ ] Document for training(after paper release)
+- [x] Document for training
 - [x] Demo script for single image
-- [ ] Demo script for video
-- [ ] Evaluation
 
 
 ## Installation
