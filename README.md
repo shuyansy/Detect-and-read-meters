@@ -61,6 +61,7 @@ You can run a demo script for a single image inference.
 
 ## Paper
 The project only for academic research, if you are interested in it, please star our project! And cite our paper as follows:
+```
 @misc{shu2023read,
       title={Read Pointer Meters in complex environments based on a Human-like Alignment and Recognition Algorithm}, 
       author={Yan Shu and Shaohui Liu and Honglei Xu and Feng Jiang},
@@ -69,6 +70,7 @@ The project only for academic research, if you are interested in it, please star
       archivePrefix={arXiv},
       primaryClass={cs.CV}
 }
+```
 
 
 
