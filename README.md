@@ -40,6 +40,7 @@ We also provide trained weight in [yolo_weight](https://drive.google.com/file/d/
 
 ## Meter Alignment
 We implement meter alignment by STN network. However, we obseve it is time-consuming. Thus we remove it in the latest version. You can still find it in the master branch.
+we also provide the [alignment weight](https://drive.google.com/file/d/1sHmEEf9E0_kvL0LW1S5Y5jjFgjx_O5Dj/view?usp=sharing)
 
 ## Meter Recognition
 We design a network for read meters, which consists of a pointer prediction head, dail prediction head, and a ocr-based value prediction head. By a post-processing method, meter readings can be obtained.
